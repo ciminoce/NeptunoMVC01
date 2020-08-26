@@ -15,15 +15,17 @@ namespace NeptunoMVC01.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "Su pagina de descripción del proyecto.";
 
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
-
+            ViewBag.Message = "Su página de Contacto.";
+            ViewBag.Calle = "One Microsoft Way";
+            ViewBag.Provincia = "Redmond, WA 98052-6399";
+            ViewBag.Telefono = "425.555.0100";
             return View();
         }
     }
