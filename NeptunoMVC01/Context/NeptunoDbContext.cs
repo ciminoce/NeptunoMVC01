@@ -18,5 +18,6 @@ namespace NeptunoMVC01.Context
         }
 
         public DbSet<Pais> Paises { get; set; }
+        public DbSet<Ciudad> Ciudades { get; set; }
     }
 }
