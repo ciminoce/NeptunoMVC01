@@ -5,6 +5,7 @@ using System.Net;
 using System.Web.Mvc;
 using NeptunoMVC01.Context;
 using NeptunoMVC01.Models;
+using PagedList;
 
 namespace NeptunoMVC01.Controllers
 {
@@ -13,9 +14,13 @@ namespace NeptunoMVC01.Controllers
         private NeptunoDbContext db = new NeptunoDbContext();
 
         // GET: Paises
-        public ActionResult Index()
+        public ActionResult Index(int? page=null)
         {
-            return View(db.Paises.ToList());
+            page = (page ?? 1);
+            var listaPaises = db.Paises
+                .OrderBy(p => p.NombrePais)
+                .ToPagedList((int) page, 10);
+            return View(listaPaises);
         }
 
         // GET: Paises/Details/5
