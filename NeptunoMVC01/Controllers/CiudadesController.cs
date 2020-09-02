@@ -14,14 +14,36 @@ namespace NeptunoMVC01.Controllers
         private NeptunoDbContext db = new NeptunoDbContext();
 
         // GET: Ciudades
-        public ActionResult Index(int? page=null)
+        public ActionResult Index(int? paisSeleccionadoId=null, int? page=null)
         {
             page = (page ?? 1);
-            var ciudades = db.Ciudades.Include(c => c.Pais)
+
+            if (paisSeleccionadoId!=null)
+            {
+                Session["paisSeleccionadoId"] = paisSeleccionadoId;
+            }
+            else
+            {
+                if (Session["paisSeleccionadoId"]!=null)
+                {
+                    paisSeleccionadoId =(int) Session["paisSeleccionadoId"];
+                }
+            }
+
+            var ciudades = paisSeleccionadoId.HasValue
+                ? db.Ciudades.Where(c => c.PaisId == paisSeleccionadoId)
+                : db.Ciudades;
+
+            var listaCiudades = ciudades.Include(c => c.Pais)
                 .OrderBy(c=>c.Pais.NombrePais)
                 .ThenBy(c=>c.NombreCiudad)
                 .ToPagedList((int)page,10);
-            return View(ciudades);
+
+            var listaPaises = db.Paises.ToList();
+            listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais = "[Seleccione un País]" });
+            ViewBag.ListaPaises = new SelectList(listaPaises, "PaisId", "NombrePais",paisSeleccionadoId);
+
+            return View(listaCiudades);
         }
 
         // GET: Ciudades/Details/5
