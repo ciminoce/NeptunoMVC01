@@ -1,26 +1,57 @@
-﻿@model NeptunoMVC01.Models.Pais
+﻿@model NeptunoMVC01.ViewModels.Pais.PaisDetailVm
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Detalles";
 }
 
-<h2>Details</h2>
+<h2>Detalles</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div>
+            <h4>Pais</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.NombrePais)
+                </dt>
 
-<div>
-    <h4>Pais</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.NombrePais)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.NombrePais)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.NombrePais)
-        </dd>
+            </dl>
+        </div>
+        <p>
+            @Html.ActionLink("Editar", "Edit", new { id = Model.PaisId }, new { @class = "btn btn-warning" })
+            @Html.ActionLink("Agregar Ciudad", "AddCity", new { id = Model.PaisId }, new { @class = "btn btn-primary" })
+            @Html.ActionLink("Volver", "Index", new { }, new { @class = "btn btn-success" })
+        </p>
 
-    </dl>
+    </div>
+    <div class="col-md-8">
+        <h4>Ciudades</h4>
+        <hr />
+        <table class="table table-bordered table-hover">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Ciudades.First().NombreCiudad)
+                </th>
+                <th></th>
+            </tr>
+
+            @foreach (var item in Model.Ciudades) {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NombreCiudad)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Editar", "Edit", new { id=item.CiudadId },new{@class="btn btn-warning"}) 
+                        @Html.ActionLink("Borrar", "Delete", new { id=item.CiudadId },new{@class="btn btn-danger"})
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.PaisId }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>

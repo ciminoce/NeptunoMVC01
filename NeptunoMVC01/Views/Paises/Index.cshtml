@@ -1,19 +1,35 @@
 ﻿@using PagedList.Mvc;
-@model PagedList.IPagedList<NeptunoMVC01.Models.Pais>
+@model PagedList.IPagedList<NeptunoMVC01.ViewModels.Pais.PaisListVm>
 @{
     ViewBag.Title = "Lista de Países";
 }
+<div class="well">
 
-<h2>Lista de Países</h2>
+    <h2>Lista de Países</h2>
+</div>
 
+@if (TempData["Msg"] != null)
+{
+    var message =(string) TempData["Msg"];
+    <div class="alert alert-info">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <strong>@message</strong> pulsar (X) para cerrar.
+    </div>
+
+}
 <p>
-    @Html.ActionLink("Nuevo", "Create", new { }, new { @class = "btn btn-primary" })
+    <a href="@Url.Action("Create", "Paises")" class="btn btn-primary">
+        <span class="glyphicon glyphicon-file"></span>
+        Nuevo
+    </a>
+    @*@Html.ActionLink("Nuevo", "Create", new {}, new {@class = "glyphicon glyphicon-file btn btn-primary"})*@
 </p>
 <table class="table table-bordered">
     <tr>
         <th>
             @Html.DisplayNameFor(model => model.First().NombrePais)
         </th>
+        <th style="text-align: center"><p>Cantidad<br/> de Ciudades</p></th>
         <th></th>
     </tr>
 
@@ -23,10 +39,23 @@
             <td>
                 @Html.DisplayFor(modelItem => item.NombrePais)
             </td>
+            <td style="text-align: center">
+                @Html.DisplayFor(modelItem=>item.CantidadDeCiudades)
+            </td>
             <td>
-                @Html.ActionLink("Editar", "Edit", new { id = item.PaisId }, new { @class = "btn btn-warning" })
-                @Html.ActionLink("Detalle", "Details", new { id = item.PaisId }, new { @class = "btn btn-info" })
-                @Html.ActionLink("Borrar", "Delete", new { id = item.PaisId }, new { @class = "btn btn-danger" })
+                <a href="@Url.Action("Edit", "Paises",new {id=item.PaisId})" class="btn btn-warning">
+                    <span class="glyphicon glyphicon-edit"></span>
+                    Editar
+                </a>
+                <a href="@Url.Action("Details", "Paises",new {id=item.PaisId})" class="btn btn-info">
+                    <span class="glyphicon glyphicon-list"></span>
+                    Detalles
+                </a>
+                <a href="@Url.Action("Delete", "Paises",new {id=item.PaisId})" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-erase"></span>
+                    Borrar
+                </a>
+
             </td>
         </tr>
     }

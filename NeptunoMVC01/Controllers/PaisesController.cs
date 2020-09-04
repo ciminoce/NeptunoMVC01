@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
 using NeptunoMVC01.Context;
 using NeptunoMVC01.Models;
+using NeptunoMVC01.ViewModels.Pais;
 using PagedList;
 
 namespace NeptunoMVC01.Controllers
@@ -13,14 +15,75 @@ namespace NeptunoMVC01.Controllers
     {
         private NeptunoDbContext db = new NeptunoDbContext();
 
+        [HttpGet]
+        public ActionResult AddCity(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Pais pais = db.Paises.Find(id);
+            if (pais == null)
+            {
+                return HttpNotFound();
+            }
+
+            Ciudad ciudad = new Ciudad
+            {
+                PaisId = pais.PaisId,
+                Pais = pais
+            };
+            return View(ciudad);
+        }
+
+        [HttpPost]
+        public ActionResult AddCity(Ciudad ciudad)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    db.Ciudades.Add(ciudad);
+                    db.SaveChanges();
+                    return RedirectToAction($"Details/{ciudad.PaisId}");
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException != null && ex.InnerException.InnerException != null &&
+                        ex.InnerException.InnerException.Message.Contains("IX"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Registro repetido!!!");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Error al intentar guardar un registro!!!");
+                    }
+                }
+            }
+
+            ciudad.Pais = db.Paises.Find(ciudad.PaisId);
+            return View(ciudad);
+        }
         // GET: Paises
         public ActionResult Index(int? page=null)
         {
             page = (page ?? 1);
-            var listaPaises = db.Paises
-                .OrderBy(p => p.NombrePais)
-                .ToPagedList((int) page, 10);
-            return View(listaPaises);
+
+            var listaPaises = db.Paises.OrderBy(p=>p.NombrePais).ToList();
+            List<PaisListVm> listaVm=new List<PaisListVm>();
+            foreach (var pais in listaPaises)
+            {
+                PaisListVm vm = new PaisListVm
+                {
+                    PaisId = pais.PaisId,
+                    NombrePais = pais.NombrePais,
+                    CantidadDeCiudades = db.Ciudades.Count(c => c.PaisId == pais.PaisId)
+                };
+                listaVm.Add(vm);
+            }
+
+            
+            return View(listaVm.ToPagedList((int)page,10));
         }
 
         // GET: Paises/Details/5
@@ -35,7 +98,14 @@ namespace NeptunoMVC01.Controllers
             {
                 return HttpNotFound();
             }
-            return View(pais);
+
+            PaisDetailVm paisVm = new PaisDetailVm
+            {
+                PaisId = pais.PaisId,
+                NombrePais = pais.NombrePais,
+                Ciudades = db.Ciudades.Where(c => c.PaisId == pais.PaisId).ToList()
+            };
+            return View(paisVm);
         }
 
         // GET: Paises/Create
@@ -57,6 +127,7 @@ namespace NeptunoMVC01.Controllers
                 {
                     db.Paises.Add(pais);
                     db.SaveChanges();
+                    TempData["Msg"] = "Registro agregado!!!";
                     return RedirectToAction("Index");
 
                 }
@@ -107,6 +178,8 @@ namespace NeptunoMVC01.Controllers
                 {
                     db.Entry(pais).State = EntityState.Modified;
                     db.SaveChanges();
+                    TempData["Msg"] = "Registro editado!!!";
+
                     return RedirectToAction("Index");
 
                 }
@@ -154,6 +227,8 @@ namespace NeptunoMVC01.Controllers
                
                 db.Paises.Remove(pais);
                 db.SaveChanges();
+                TempData["Msg"] = "Registro Borrado!!!";
+
                 return RedirectToAction("Index");
 
             }
