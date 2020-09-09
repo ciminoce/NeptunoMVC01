@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using NeptunoMVC01.Classes;
 using NeptunoMVC01.Context;
 using NeptunoMVC01.Models;
 using PagedList;
@@ -30,17 +32,37 @@ namespace NeptunoMVC01.Controllers
                 }
             }
 
-            var ciudades = paisSeleccionadoId.HasValue
-                ? db.Ciudades.Where(c => c.PaisId == paisSeleccionadoId)
-                : db.Ciudades;
+            List<Ciudad> ciudades;
+            if (paisSeleccionadoId.HasValue)
+            {
+                if (paisSeleccionadoId.Value>0)
+                {
+                    ciudades=db.Ciudades
+                        .Include(c=>c.Pais)
+                        .Where(c => c.PaisId == paisSeleccionadoId).ToList();
+                }
+                else
+                {
+                    ciudades = db.Ciudades.Include(c=>c.Pais).ToList();
+                } 
+            }
+            else
+            {
+                ciudades = db.Ciudades.Include(c => c.Pais).ToList();
 
-            var listaCiudades = ciudades.Include(c => c.Pais)
+            }
+            //ciudades = paisSeleccionadoId.HasValue
+            //    ? db.Ciudades.Where(c => c.PaisId == paisSeleccionadoId)
+            //    : db.Ciudades;
+
+            var listaCiudades = ciudades
                 .OrderBy(c=>c.Pais.NombrePais)
                 .ThenBy(c=>c.NombreCiudad)
                 .ToPagedList((int)page,10);
 
             var listaPaises = db.Paises.ToList();
             listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais = "[Seleccione un País]" });
+            listaPaises.Insert(1,new Pais(){PaisId = -1,NombrePais = "[Ver Todos]"});
             ViewBag.ListaPaises = new SelectList(listaPaises, "PaisId", "NombrePais",paisSeleccionadoId);
 
             return View(listaCiudades);
@@ -64,9 +86,7 @@ namespace NeptunoMVC01.Controllers
         // GET: Ciudades/Create
         public ActionResult Create()
         {
-            var listaPaises = db.Paises.ToList();
-            listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais ="[Seleccione un País]"});
-            ViewBag.PaisId = new SelectList(listaPaises, "PaisId", "NombrePais");
+            ViewBag.PaisId = new SelectList(Helper.GetPaises(), "PaisId", "NombrePais");
             return View();
         }
 
@@ -103,9 +123,7 @@ namespace NeptunoMVC01.Controllers
 
             }
 
-            var listaPaises = db.Paises.ToList();
-            listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais = "[Seleccione un País]" });
-            ViewBag.PaisId = new SelectList(listaPaises, "PaisId", "NombrePais",ciudad.PaisId);
+            ViewBag.PaisId = new SelectList(Helper.GetPaises(), "PaisId", "NombrePais",ciudad.PaisId);
             return View(ciudad);
         }
 
@@ -121,9 +139,7 @@ namespace NeptunoMVC01.Controllers
             {
                 return HttpNotFound();
             }
-            var listaPaises = db.Paises.ToList();
-            listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais = "[Seleccione un País]" });
-            ViewBag.PaisId = new SelectList(listaPaises, "PaisId", "NombrePais", ciudad.PaisId);
+            ViewBag.PaisId = new SelectList(Helper.GetPaises(), "PaisId", "NombrePais", ciudad.PaisId);
             return View(ciudad);
         }
 
@@ -158,9 +174,7 @@ namespace NeptunoMVC01.Controllers
                 }
 
             }
-            var listaPaises = db.Paises.ToList();
-            listaPaises.Insert(0, new Pais() { PaisId = 0, NombrePais = "[Seleccione un País]" });
-            ViewBag.PaisId = new SelectList(listaPaises, "PaisId", "NombrePais", ciudad.PaisId);
+            ViewBag.PaisId = new SelectList(Helper.GetPaises(), "PaisId", "NombrePais", ciudad.PaisId);
             return View(ciudad);
         }
 

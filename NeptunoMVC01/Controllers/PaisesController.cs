@@ -87,7 +87,7 @@ namespace NeptunoMVC01.Controllers
         }
 
         // GET: Paises/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, int? page=null)
         {
             if (id == null)
             {
@@ -99,13 +99,23 @@ namespace NeptunoMVC01.Controllers
                 return HttpNotFound();
             }
 
-            PaisDetailVm paisVm = new PaisDetailVm
+            //PaisDetailVm paisVm = new PaisDetailVm
+            //{
+            //    PaisId = pais.PaisId,
+            //    NombrePais = pais.NombrePais,
+            //    Ciudades = db.Ciudades.Where(c => c.PaisId == pais.PaisId).ToList()
+            //};
+            page = (page ?? 1);
+            PaisDetailPageListVm paisVm = new PaisDetailPageListVm
             {
                 PaisId = pais.PaisId,
                 NombrePais = pais.NombrePais,
-                Ciudades = db.Ciudades.Where(c => c.PaisId == pais.PaisId).ToList()
+                Ciudades = db.Ciudades
+                    .Where(c => c.PaisId == pais.PaisId)
+                    .OrderBy(c => c.NombreCiudad)
+                    .ToPagedList((int) page, 7)
             };
-            return View(paisVm);
+            return View("Details2",paisVm);
         }
 
         // GET: Paises/Create
